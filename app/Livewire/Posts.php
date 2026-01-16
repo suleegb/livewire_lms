@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Country;
 use App\Models\Post;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -14,7 +15,7 @@ class Posts extends Component
     #[Validate('image|max:1024')]
 
 
-    public $title, $description, $image, $old_image, $post_id;
+    public $title, $description, $image, $old_image,$country_id, $post_id;
     public $isEdit;
 
 
@@ -25,6 +26,7 @@ class Posts extends Component
             'title' => 'required',
             'description' => 'required',
             'image' => 'image|max:1024|nullable'
+            
 
         ]);
         if ($this->isEdit) {
@@ -32,9 +34,11 @@ class Posts extends Component
                 $filename = time() . '-' . $this->image->getClientOriginalName();
                 $this->image->storeAs('photos', $filename, 'public');
                 $validate['image'] = $filename;
+                $validate['country_id'] = $this->country_id;
             } else {
 
                 $validate['image'] = $this->old_image;
+                
             }
 
             Post::findOrFail($this->post_id)->update($validate);
@@ -42,6 +46,7 @@ class Posts extends Component
             $filename = time() . '-' . $this->image->getClientOriginalName();
             $this->image->storeAs('photos', $filename, 'public');
             $validate['image'] = $filename;
+             $validate['country_id'] = $this->country_id;
             Post::create($validate);
         }
         $this->resetFields();
@@ -53,12 +58,14 @@ class Posts extends Component
         $this->description = '';
         $this->isEdit = false;
         $this->image = '';
+        $this->country_id = '';
     }
 
     public function render()
     {
         $posts = Post::all();
-        return view('livewire.posts', compact('posts'));
+        $countries = Country::all();
+        return view('livewire.posts', compact('posts','countries'));
     }
 
 
